@@ -85,4 +85,11 @@ for (const file of eventFiles) {
 	}
 }
 
-client.login(process.env.BOT_TOKEN);
+async function start() {
+	await client.login(process.env.BOT_TOKEN);
+}
+
+start().catch((error) => {
+	console.error("Failed to start the bot:", error);
+	process.exitCode = 1;
+});
