@@ -3,7 +3,6 @@ const {
 	PermissionFlagsBits,
 	MessageFlags,
 } = require("discord.js");
-const mysql = require("mysql2/promise");
 const axios = require("axios");
 const { parse } = require("csv-parse");
 const { Transform } = require("node:stream");
@@ -57,32 +56,11 @@ module.exports = {
 };
 
 async function setupDatabase(interaction) {
-	const databaseName = process.env.DB_NAME;
-
-	if (!databaseName || !/^[a-zA-Z0-9_]+$/.test(databaseName)) {
-		throw new Error(
-			"DB_NAME must contain only letters, numbers, and underscores.",
-		);
-	}
-
-	const connection = await mysql.createConnection({
-		host: process.env.DB_HOST || "localhost",
-		port: Number(process.env.DB_PORT || 3306),
-		user: process.env.DB_USER,
-		password: process.env.DB_PASSWORD ?? "",
-	});
-
-	try {
-		await connection.query(
-			`CREATE DATABASE IF NOT EXISTS \`${databaseName}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
-		);
-	} finally {
-		await connection.end();
-	}
-
 	await sequelize.authenticate();
 	await sequelize.sync();
-	await interaction.editReply("The CD key database and table are ready.");
+	await interaction.editReply(
+		`The CD key database is ready at \`${sequelize.options.storage}\`.`,
+	);
 }
 
 async function importCsv(interaction) {
@@ -94,6 +72,7 @@ async function importCsv(interaction) {
 	}
 
 	await sequelize.authenticate();
+	await sequelize.sync();
 
 	const response = await axios.get(attachment.url, {
 		responseType: "stream",

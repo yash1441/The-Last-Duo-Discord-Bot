@@ -1,39 +1,24 @@
+const path = require("node:path");
 const { DataTypes, Sequelize } = require("sequelize");
 
-const requiredEnvironmentVariables = ["DB_NAME", "DB_USER"];
-const missingEnvironmentVariables = requiredEnvironmentVariables.filter(
-	(variable) => !process.env[variable],
+const storage = path.resolve(
+	process.env.SQLITE_PATH || path.join(__dirname, "..", "database.sqlite"),
 );
-
-if (missingEnvironmentVariables.length > 0) {
-	throw new Error(
-		`Missing required database environment variables: ${missingEnvironmentVariables.join(", ")}`,
-	);
-}
-
-const sequelize = new Sequelize(
-	process.env.DB_NAME,
-	process.env.DB_USER,
-	process.env.DB_PASSWORD ?? "",
-	{
-		host: process.env.DB_HOST || "localhost",
-		port: Number(process.env.DB_PORT || 3306),
-		dialect: "mysql",
-		logging: false,
-		pool: {
-			max: 10,
-			min: 0,
-			acquire: 30_000,
-			idle: 10_000,
-		},
+const sequelize = new Sequelize({
+	dialect: "sqlite",
+	storage,
+	logging: false,
+	pool: {
+		max: 1,
+		min: 0,
 	},
-);
+});
 
 const Code = sequelize.define(
 	"Code",
 	{
 		id: {
-			type: DataTypes.BIGINT.UNSIGNED,
+			type: DataTypes.INTEGER,
 			autoIncrement: true,
 			primaryKey: true,
 		},
@@ -60,4 +45,4 @@ const Code = sequelize.define(
 	},
 );
 
-module.exports = { Code, sequelize };
+module.exports = { Code, sequelize, storage };
