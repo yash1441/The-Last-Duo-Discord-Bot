@@ -46,6 +46,17 @@ module.exports = {
 	async execute(interaction) {
 		const subcommand = interaction.options.getSubcommand();
 
+		if (
+			(subcommand === "clear-user" || subcommand === "clear-all") &&
+			interaction.user.id !== process.env.MY_ID
+		) {
+			await interaction.reply({
+				content: `Please contact <@${process.env.MY_ID}> to use this subcommand.`,
+				flags: MessageFlags.Ephemeral,
+			});
+			return;
+		}
+
 		if (subcommand === "clear-all") {
 			await confirmClearAll(interaction);
 		} else {
