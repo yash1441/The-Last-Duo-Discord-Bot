@@ -43,7 +43,11 @@ module.exports = {
                 }
             }
         } else if (interaction.isButton()) {
-            const button = interaction.client.buttons.get(interaction.customId);
+            const button =
+                interaction.client.buttons.get(interaction.customId) ??
+                [...interaction.client.buttons.values()].find((candidate) =>
+                    candidate.matches?.(interaction.customId)
+                );
 
             if (!button) {
                 return console.error(
